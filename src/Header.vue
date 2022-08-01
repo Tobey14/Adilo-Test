@@ -49,7 +49,7 @@
             </ul>
 
             <div class="form-inline ml-5 my-lg-0">
-              <span class="help">Help</span>
+              <span class="help mr-2">Help</span>
 
               <img src="./assets/images/social-3.png" alt="" class="imageRight">
 

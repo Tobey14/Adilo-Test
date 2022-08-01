@@ -23,6 +23,13 @@ body{
 
 }
 
+@media screen and (max-width:500px) {
+  .navbar-brand{
+    margin-right:10px !important;
+  }
+  
+}
+
 .logo{
     width:30px;
     margin-left: 2px;
@@ -98,6 +105,12 @@ li.active > .dropdown-menu>a.activate{
     padding-left:20px;
     padding-right:20px;
 
+}
+
+@media screen and (max-width:500px) {
+  .content{
+    padding:0px !important;
+  }
 }
 
 .sidebar{
@@ -229,6 +242,8 @@ opacity: 1;
     text-align: center;
 }
 
+
+
 .imgEmpty~p{
     font-family:Helvetica Neue !important;
     font-size:14px !important;
@@ -238,11 +253,30 @@ opacity: 1;
     max-width:460px;
 }
 
+
+
 .btnDiv{
     width:320px;
     margin:auto;
 }
 
+
+@media screen and (max-width:500px){
+  .imgEmpty~p{
+    font-family:Helvetica Neue !important;
+    font-size:14px !important;
+    letter-spacing: 0px;
+    color: #637C8E;
+    opacity: 1;
+    width:90%;
+    margin: auto;
+  }
+
+  .btnDiv{
+    width: 90%;
+    margin:auto;
+  }
+}
 .adiloImage{
     width: 441px;
     height: 262px;

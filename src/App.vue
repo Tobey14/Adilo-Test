@@ -528,6 +528,11 @@ export default {
             this.recordings.push(newRec);
 
             sessionStorage.removeItem('videoUrl');
+            setTimeout(()=>{
+              document.querySelector(".video").src = '';
+
+            },10000)
+
           },6000)
 
           

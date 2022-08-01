@@ -50,7 +50,6 @@
 
             <div class="form-inline ml-5 my-lg-0">
               <span class="help">Help</span>
-              <hr>
 
               <img src="./assets/images/social-3.png" alt="" class="imageRight">
 

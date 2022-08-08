@@ -285,6 +285,16 @@ opacity: 1;
     opacity: 1;
 }
 
+
+@media screen and (max-width:500px){
+  .adiloImage{
+    width:100%;
+  }
+  .sayHello{
+    margin-top: 5px;
+  }
+}
+
 /* recording page */
 
 .myTable{

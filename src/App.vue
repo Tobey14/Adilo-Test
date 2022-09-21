@@ -14,7 +14,7 @@
         </div>
 
         <div class="modal-footer justify-content-center mt-2">
-            <button type="button" class="button btnDisabled text-center" style="width: 259px;height: 51px;">Start Recording</button>
+            <button type="button" class="button text-center" style="width: 259px;height: 51px;" @click="startRecording()">Start Recording</button>
         </div>
 
         
@@ -34,16 +34,17 @@
         </div>
         <div class="blueDiv">
             <video class="video" width="100%" height="100%" controls autoplay></video>
-            <audio class="audio" width="100%" height="100%" controls autoplay>
+            <audio class="audio" width="100%" height="100%" style="visibility:hidden;" controls autoplay>
               <source class="audioSourceOgg" src="" type="audio/ogg">
               <source class="audioSourceMp3" src="" type="audio/mpeg">
-          </audio>
+            </audio>
         </div>
 
         <div class="modal-footer justify-content-center mt-2">
-            <button type="button" class="button btnDisabled text-center" style="width: 259px;height: 51px;">Start Recording</button>
-            <button type="button" v-if="recording && recordCamera" @click="stopCameraRecord()" class="button text-center" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
-            <button type="button" v-if="recording && recordMic" @click="stopMicRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
+            <button type="button" class="button btnDisabled text-center" style="width: 259px;height: 51px;" @click="startRecording()">Start Recording</button>
+            <button type="button" v-if="recording && recordCamera && !recordMic" @click="stopCameraRecord()" class="button text-center" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
+            <button type="button" v-if="recording && recordMic && !recordCamera" @click="stopMicRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
+            <button type="button" v-if="recording && recordMic && recordCamera" @click="stopCameraRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
         </div>
 
         
@@ -309,7 +310,7 @@
             </div>
           </div>
           <div class="modal-footer justify-content-center">
-            <button type="button" class="button btnRequest text-center" data-dismiss="modal" aria-label="Close" style="width: 259px;height: 51px;" @click="startRecording()">Start
+            <button type="button" class="button btnRequest text-center" data-dismiss="modal" aria-label="Close" style="width: 259px;height: 51px;" @click="this.askingPermission = true">Start
               Recording</button>
           </div>
         </div>
@@ -352,20 +353,14 @@ export default {
   methods: {
     toggleRecordScreen(){
       this.recordScreen = !this.recordScreen;
-      this.recordCamera = false;
-      this.recordMic = false;
       this.updateView();
     },
     toggleRecordCamera(){
       this.recordCamera = !this.recordCamera;
-      this.recordScreen = false;
-      this.recordMic = false;
       this.updateView();
     },
     toggleRecordMic(){
       this.recordMic = !this.recordMic;
-      this.recordCamera = false;
-      this.recordScreen = false;
       this.updateView();
     },
 
@@ -389,7 +384,7 @@ export default {
 
       let chunks = []
       mediaRecorder.addEventListener('dataavailable', function(e) {
-          chunks.push(e.data)
+          chunks.push(e.data);
       })
 
       mediaRecorder.addEventListener('stop', function(){
@@ -397,7 +392,7 @@ export default {
               type: chunks[0].type
           })
 
-          let video = document.querySelector(".video")
+          let video = document.querySelector(".video");
           let url = URL.createObjectURL(blob);
 
           video.src = url;
@@ -416,7 +411,7 @@ export default {
       
 
       var localStreamConstraints = {
-          audio: false,
+          audio: this.recordMic? true:false,
           video: true,
       };
 
@@ -431,6 +426,57 @@ export default {
       .getUserMedia(localStreamConstraints)
       .then((stream)=>{
           document.querySelector('.video').srcObject = stream;
+
+          // [...this.recordings, newRecord]; 
+          // this.recordings.push(newRecord);
+      })
+      .catch(function (e) {
+          if (confirm("An error with camera occured:(" + e.name + ") Do you want to reload?")) {
+              location.reload();
+          }
+      });
+
+    },
+
+    recordWithScreenAndCamera(){     
+      
+
+      var localStreamConstraints = {
+          audio: this.recordMic? true:false,
+          video: true,
+      };
+
+      this.askingPermission = false;
+      this.recording = true;
+      
+    
+      console.log('recording camera');
+      
+
+      navigator.mediaDevices
+      .getUserMedia(localStreamConstraints)
+      .then((stream)=>{
+          document.querySelector('.video').srcObject = stream;
+
+          this.recordWithScreen().then(()=>{
+
+            setTimeout(()=>{
+              var size = Math.floor(Math.random() * 1000);
+              var date = new Date();
+              const newRec = {type:'videoScreen', src:sessionStorage.getItem('videoUrl'), project:this.selectedProject, description:this.description, views:1, size:size+' KB', date:date};
+
+              this.recordings.push(newRec);
+
+              sessionStorage.removeItem('videoUrl');
+              setTimeout(()=>{
+                document.querySelector(".video").src = '';
+
+              },10000)
+
+            },6000)
+
+
+          });
 
           // [...this.recordings, newRecord]; 
           // this.recordings.push(newRecord);
@@ -460,7 +506,6 @@ export default {
 
     recordWithMic(){
       console.log('recording mic')
-
       this.askingPermission = false;
       this.recording = true;
 
@@ -513,11 +558,14 @@ export default {
     
 
     startRecording(){
-      this.askingPermission = true;
       this.updateView();
+      console.log('yes')
 
+      if((this.recordScreen && this.recordCamera && !this.recordMic) || (this.recordScreen && this.recordCamera && this.recordMic)){
+        this.recordWithScreenAndCamera();
+      }
 
-      if(this.recordScreen){
+      if(this.recordScreen && !this.recordCamera && !this.recordMic){
         this.recordWithScreen().then(()=>{
 
           setTimeout(()=>{
@@ -535,16 +583,16 @@ export default {
 
           },6000)
 
-          
+
         });
       }
 
-      if(this.recordCamera){
+      if((this.recordCamera && !this.recordScreen && !this.recordMic) || (this.recordCamera && this.recordMic)){
         this.recordWithCamera();
       }
 
 
-      if(this.recordMic){
+      if(this.recordMic && !this.recordCamera && !this.recordScreen){
         this.recordWithMic();
       }
 
@@ -583,6 +631,8 @@ export default {
       }
       
     },
+
+
     sortByDate(){
       if(this.recordings.length>1){
         this.recordings.reverse();

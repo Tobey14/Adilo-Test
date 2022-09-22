@@ -45,6 +45,7 @@
             <button type="button" v-if="recording && recordCamera && !recordMic" @click="stopCameraRecord()" class="button text-center" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
             <button type="button" v-if="recording && recordMic && !recordCamera" @click="stopMicRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
             <button type="button" v-if="recording && recordMic && recordCamera" @click="stopCameraRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
+            <button type="button" v-if="recording && recordScreen && !recordCamera" @click="stopCameraRecord()" class="button text-center stopAudioBtn" style="width: 259px;height: 51px;background-color:red;color:white;">Stop Recording</button>
         </div>
 
         
@@ -365,9 +366,11 @@ export default {
     },
 
     async recordWithScreen(){
+      
 
       let stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true
+        video: true,
+        audio: this.recordMic? true:false,
       });
 
       this.askingPermission = false;
@@ -382,10 +385,19 @@ export default {
           mimeType: mime
       })
 
-      let chunks = []
+      let chunks = [];
       mediaRecorder.addEventListener('dataavailable', function(e) {
           chunks.push(e.data);
       })
+
+      mediaRecorder.addEventListener('start', function(){
+        document.querySelector(".video").srcObject = stream;
+
+      })
+
+      if(this.recording == false){
+        mediaRecorder.stop();
+      }
 
       mediaRecorder.addEventListener('stop', function(){
           let blob = new Blob(chunks, {
@@ -397,8 +409,7 @@ export default {
 
           video.src = url;
           sessionStorage.setItem('videoUrl', url);
-
-          
+          this.recording = false;
       })
       //start the recorder manually
       mediaRecorder.start()
